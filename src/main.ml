@@ -24,6 +24,8 @@ let count = catalan n
 let unrank index =
 
 	let rec paire reste (gauche,droite) =
+(* 		Printf.printf "reste %d" reste;
+		flush stdout; *)
 		if droite = n-1 then 
 			(gauche, droite) 
 		else
@@ -36,19 +38,20 @@ let unrank index =
 	in
 
 	let rec ur nbr i =
+(* 		Printf.printf "nbr %d \n" nbr;
+		flush stdout; *)
 		match nbr with
 		| 0 -> F(0)
 		| 1 -> N(F(0), F(0))
 		| a -> let (left, right) = paire i (nbr-1, 0) in
 
-			Printf.printf " left : %d right %d  index %d \n " left right i ;
-			flush stdout;
+(* 			Printf.printf " left : %d right %d  index %d \n " left right i ;
+			flush stdout; *)
 
 			if right > 0 then
-			   N(ur left (i mod right), ur right ( i / right ))
+			   N(ur left (i / (catalan right)), ur right ( 1+(i mod (catalan right)) ))
 			else
 			   N(ur left i, ur 0 0)
-		
 	in
 
 	ur n index
