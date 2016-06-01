@@ -21,7 +21,6 @@ let catalan n =
 	
 let count = catalan n
 
-
 let unrank index =
 
 	let rec paire reste (gauche,droite) =
@@ -51,17 +50,43 @@ let unrank index =
 
 	ur n index
 
+let rec compte_n arbre =
+	match arbre with
+	| F -> 0
+	| N(g,d) -> 1 + compte_n g + compte_n d
+
+let somme_cat nbr =
+	let i = ref nbr in 
+	let tmp = ref 0 in
+
+	while !i <> n-1 do 
+		tmp := !tmp + catalan (!i+1) * catalan (n-2-(!i));
+		incr i;
+	done;
+
+	!tmp
+
+let rec rank arbre = 
+	let rec rk abr acc = 
+		match abr with
+		| N(N(F,F), F) -> acc
+		| N(F, N(F,F)) -> acc+1
+		| N(g, F) -> rk g acc
+		| N(g, d) -> let c_gauche = compte_n g in 
+		             let min = somme_cat c_gauche in 
+		             rk d (acc+min)
+		| F -> acc
+	in
+
+	rk arbre 0
 
 let rec affiche_arbre a=
 	match a with
 	| F -> Printf.printf "F" 
 	| N(g,d) -> Printf.printf "N(" ; affiche_arbre g; Printf.printf ","; affiche_arbre d; Printf.printf ")"
 
-
 let () =
 
 	for i = 1 to catalan n do 
 	let test = unrank i in Printf.printf "\n\n"; affiche_arbre test
 	done 
-
-	
