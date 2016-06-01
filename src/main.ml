@@ -80,6 +80,17 @@ let rec rank arbre =
 
 	rk arbre 0
 
+let rotationD arbre = 
+	match arbre with
+	| N(N(sg,sd),d) -> 
+	| _ -> expr2
+
+let next arbre = () (*utiliser rotationD qd on a trouvé le bon pivot *)
+
+let rotationG arbre = ()
+
+let previous arbre = () (*utiliser rotationG qd on a trouvé le bon pivot *)
+
 let rec affiche_arbre a=
 	match a with
 	| F -> Printf.printf "F" 
