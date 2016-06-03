@@ -1,7 +1,7 @@
 type arbre = F | N of arbre * arbre 
 
 (* nombre de noeuds *)
-let n = 4
+let n = 8
 
 let fact n = 
 
@@ -82,14 +82,29 @@ let rec rank arbre =
 
 let rotationD arbre = 
 	match arbre with
-	| N(N(sg,sd),d) -> 
-	| _ -> expr2
+	| N(N(sg,sd),d) -> N(sg,N(sd,d))
+	| _ -> raise Exit (*rotation impossible*)
 
-let next arbre = () (*utiliser rotationD qd on a trouvé le bon pivot *)
+let rec next arbre =
+	match arbre with
+	 | N(F, F) -> raise Exit
+	 | N(g, F) -> N(next g, F) (*a verifier*)
+	 | N(g, d) -> try 
+	 				N(g, next d)
+	 			with exit -> N(rotationD g, d) (*si rotation plante, ca renvoie exit qd mme*)
+	 						
+let rotationG arbre = 
+	match arbre with
+	| N(g,N(sg,sd)) -> N(N(g,sg),sd)
+	| _ -> raise Exit (*rotation impossible*)
 
-let rotationG arbre = ()
-
-let previous arbre = () (*utiliser rotationG qd on a trouvé le bon pivot *)
+let rec previous arbre = 
+	match arbre with
+	| N(F, F) -> raise Exit
+	| N(F, d) -> N(F, previous d)
+	| N(g, d) -> try 
+					N(previous g, d)
+				with exit -> N(g, rotationG d) (*pareil, peut renvoyer exit*)
 
 let rec affiche_arbre a=
 	match a with
@@ -98,6 +113,8 @@ let rec affiche_arbre a=
 
 let () =
 
+(* 	Printf.printf "nbr %d\n" count
+ *)
 	for i = 1 to catalan n do 
-	let test = unrank i in Printf.printf "\n\n"; affiche_arbre test
-	done 
+		let test = unrank i in Printf.printf "\n\n"; affiche_arbre test
+	done  
