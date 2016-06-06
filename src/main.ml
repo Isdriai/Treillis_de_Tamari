@@ -1,7 +1,7 @@
 type arbre = F | N of arbre * arbre 
 
 (* nombre de noeuds *)
-let n = 8
+let n = 6
 
 let fact n = 
 
@@ -80,31 +80,46 @@ let rec rank arbre =
 
 	rk arbre 0
 
-let rotationD arbre = 
+let rec lisG ?(enleve = false) ?(ajoute = false) arbre =
+
+	if enleve then 
+		match arbre with
+		| N(g, d ) -> N(F, lisG d)
+		| _ -> Printf.printf"what \n" ; raise Exit (*Ne doit pas arriver !!!*)
+	else if ajoute then
+		N(lisG arbre, F)
+	else
 	match arbre with
-	| N(N(sg,sd),d) -> N(sg,N(sd,d))
-	| _ -> raise Exit (*rotation impossible*)
+	| F -> F
+	| N(F, d) -> N(lisG d, F)
+	| N(g, d) -> N(lisG g, lisG d)
+
 
 let rec next arbre =
+	Printf.printf "test next \n";
 	match arbre with
-	 | N(F, F) -> raise Exit
-	 | N(g, F) -> N(next g, F) (*a verifier*)
+	 | F -> raise Exit (*n'existe pas de suivant avec cette branche*)
+	 | N(F, F) -> raise Exit (*n'existe pas de suivant avec cette branche *)
 	 | N(g, d) -> try 
-	 				N(g, next d)
-	 			with exit -> N(rotationD g, d) (*si rotation plante, ca renvoie exit qd mme*)
+	 				N(g, next d) (*on essaye de trouver un suivant avec la branche droite*)
+	 			with exit ->
+	 				try 
+	 					N(next g, lisG d) (* puis avec la branche gauche*)
+	 				with exit ->
+	 					match g with (*on regarde si on peut creer un suivant*)
+	 					| F -> raise Exit  (*on peut rien faire*)
+	 					| _ -> Printf.printf "bonjour \n" ;N(lisG ~enleve: true g, lisG ~ajoute: true d) 
+	 					(*on peut en retirant un noeud de gauche et en le mettant à droite*)
 	 						
-let rotationG arbre = 
-	match arbre with
-	| N(g,N(sg,sd)) -> N(N(g,sg),sd)
-	| _ -> raise Exit (*rotation impossible*)
-
+(* 
 let rec previous arbre = 
 	match arbre with
+	| F -> raise Exit
 	| N(F, F) -> raise Exit
 	| N(F, d) -> N(F, previous d)
 	| N(g, d) -> try 
 					N(previous g, d)
-				with exit -> N(g, rotationG d) (*pareil, peut renvoyer exit*)
+				with exit -> N(g, rotationG d) (*pareil, peut renvoyer exit*) *)
 
 let rec affiche_arbre a=
 	match a with
@@ -115,6 +130,20 @@ let () =
 
 (* 	Printf.printf "nbr %d\n" count
  *)
-	for i = 1 to catalan n do 
-		let test = unrank i in Printf.printf "\n\n"; affiche_arbre test
-	done  
+
+	let rec test_next elem cpt =
+		if cpt = count then 
+			() 
+		else
+
+			affiche_arbre elem;
+			Printf.printf "       ";
+			affiche_arbre (unrank cpt);
+			Printf.printf "\n\n";
+
+			let nwelem = next elem in 
+
+			test_next nwelem (cpt+1)
+	in
+
+	test_next (unrank 1) 1
