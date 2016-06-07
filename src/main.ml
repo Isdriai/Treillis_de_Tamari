@@ -41,8 +41,7 @@ let unrank index =
 		| 1 -> N(F, F)
 		| a -> let (reste,left, right) = paire i (nbr-1, 0) in
 
-(*  			Printf.printf "reste %d     index %d       left %d   right %d \n"reste i left right;
- *) 
+
 			if right > 0 then 	
 			   N(ur left (1+((reste-1) / (catalan right))), ur right (1+((reste-1) mod catalan right))) 
 			else
@@ -95,9 +94,7 @@ let rec lisG ?(enleve = false) ?(ajoute = false) arbre =
 	| N(F, d) -> N(lisG d, F)
 	| N(g, d) -> N(lisG g, lisG d)
 
-
 let rec next arbre =
-
 	match arbre with
 	 | F -> raise Exit (*n'existe pas de suivant avec cette branche*)
 	 | N(F, F) -> raise Exit (*n'existe pas de suivant avec cette branche *)
@@ -112,7 +109,6 @@ let rec next arbre =
 	 					| _ -> N(lisG ~enleve: true g, lisG ~ajoute: true d) 
 	 					(*on peut en retirant un noeud de gauche et en le mettant à droite*)
 	 
-
 let rec lisD ?(enleve = false) ?(ajoute = false) arbre =
 	if enleve then
 		match arbre with
@@ -131,30 +127,28 @@ let rec previous arbre =
 	| F -> raise Exit
 	| N(F, F) -> raise Exit
 	| N(g, d) -> try
-					N(previous g, d)
+					N(g, previous d)
 				with exit ->
 					try
-						N(lisD g, previous d)
+						N(previous g, lisD d)
 					with exit -> 
 						match d with
 						| F -> raise Exit
 						| _ -> N(lisD ~ajoute: true g, lisD ~enleve: true d)
-					
-	
-(* 
-let rec previous arbre = 
-	match arbre with
-	| F -> raise Exit
-	| N(F, F) -> raise Exit
-	| N(F, d) -> N(F, previous d)
-	| N(g, d) -> try 
-					N(previous g, d)
-				with exit -> N(g, rotationG d) (*pareil, peut renvoyer exit*) *)
 
 let rec affiche_arbre a=
 	match a with
 	| F -> Printf.printf "F" 
 	| N(g,d) -> Printf.printf "N(" ; affiche_arbre g; Printf.printf ","; affiche_arbre d; Printf.printf ")"
+
+let affiche_sup a =
+	let rec aff s = function
+	| F -> Printf.printf "%s" s; Printf.printf "F\n"
+	| N (d, g) -> let s2 = s^"|            " in
+		 aff s2 g; Printf.printf "%s" s; Printf.printf"N\n"; aff s2 d 
+	in
+	aff "" a
+
 
 let () =
 
@@ -162,7 +156,7 @@ let () =
  	flush stdout;
  
 
- 	let rec test_next elem cpt =
+(*  	let rec test_next elem cpt =
 
 			Printf.printf " nouvelle etape \n";
 			affiche_arbre elem;
@@ -180,10 +174,10 @@ let () =
 			test_next nwelem (cpt+1)
 	in
 
-	test_next (unrank 1) 1  
+	test_next (unrank 1) 1   *)
  
-
-(* 	let rec test_previous elem cpt =
+ 
+	let rec test_previous elem cpt =
 
 		Printf.printf "nouvelle etape\n";
 		affiche_arbre elem;
@@ -191,7 +185,7 @@ let () =
 		let urk = unrank cpt in 
 		affiche_arbre urk;
 
-		Printf.printf "     %b" (urk=elem);
+		Printf.printf "     %b    %d" (urk=elem) cpt;
 
 		Printf.printf "\n\n";
 		let nwelem = previous elem in 
@@ -199,16 +193,13 @@ let () =
 		test_previous nwelem (cpt-1)
 	in 
 
-	test_previous (unrank count) count *)
+	test_previous (unrank count) count  
 
-(*  let truc = unrank 22 in 
+(* let truc = unrank 113 in 
  			Printf.printf "\n\n";
-
- let truc = unrank 59 in 
-
-			Printf.printf "\n\n";
-
- let truc = unrank 61 in
- () 
-
- *)
+affiche_sup truc;
+Printf.printf "\n\n";
+affiche_sup (previous truc);
+ 
+Printf.printf "\n\n";
+affiche_sup (unrank 112) *)
