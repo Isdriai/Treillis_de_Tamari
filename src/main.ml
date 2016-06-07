@@ -1,5 +1,4 @@
 type arbre = F | N of arbre * arbre 
-
 (* nombre de noeuds *)
 let n = 6
 
@@ -84,8 +83,8 @@ let rec lisG ?(enleve = false) ?(ajoute = false) arbre =
 
 	if enleve then 
 		match arbre with
-		| N(g, d ) -> N(F, lisG d)
-		| _ -> Printf.printf"what \n" ; raise Exit (*Ne doit pas arriver !!!*)
+		| N(_, d ) -> lisG d
+		| _ -> raise Exit (*Ne doit pas arriver !!!*)
 	else if ajoute then
 		N(lisG arbre, F)
 	else
@@ -96,7 +95,7 @@ let rec lisG ?(enleve = false) ?(ajoute = false) arbre =
 
 
 let rec next arbre =
-	Printf.printf "test next \n";
+
 	match arbre with
 	 | F -> raise Exit (*n'existe pas de suivant avec cette branche*)
 	 | N(F, F) -> raise Exit (*n'existe pas de suivant avec cette branche *)
@@ -108,9 +107,38 @@ let rec next arbre =
 	 				with exit ->
 	 					match g with (*on regarde si on peut creer un suivant*)
 	 					| F -> raise Exit  (*on peut rien faire*)
-	 					| _ -> Printf.printf "bonjour \n" ;N(lisG ~enleve: true g, lisG ~ajoute: true d) 
+	 					| _ -> N(lisG ~enleve: true g, lisG ~ajoute: true d) 
 	 					(*on peut en retirant un noeud de gauche et en le mettant à droite*)
-	 						
+	 
+
+let rec lisD ?(enleve = false) ?(ajoute = false) arbre =
+	if enleve then
+		match arbre with
+		| N(g,_) -> lisD g
+		| _ -> raise Exit
+	else if ajoute then
+		N(F, lisD arbre)
+	else
+	match arbre with
+	| F -> F 
+	| N(g, F) -> N(F, lisD g)
+	| N(g, d) -> N(lisD g, lisD d)
+
+let rec previous arbre =
+	match arbre with
+	| F -> raise Exit
+	| N(F, F) -> raise Exit
+	| N(g, d) -> try
+					N(previous g, d)
+				with exit ->
+					try
+						N(lisD g, previous d)
+					with exit -> 
+						match d with
+						| F -> raise Exit
+						| _ -> N(lisD ~ajoute: true g, lisD ~enleve: true d)
+					
+	
 (* 
 let rec previous arbre = 
 	match arbre with
@@ -131,14 +159,15 @@ let () =
 (* 	Printf.printf "nbr %d\n" count
  *)
 
-	let rec test_next elem cpt =
-		if cpt = count then 
-			() 
-		else
+ 	let rec test_next elem cpt =
 
+			Printf.printf " nouvelle etape \n";
 			affiche_arbre elem;
 			Printf.printf "       ";
-			affiche_arbre (unrank cpt);
+			let urk = unrank cpt in 
+			affiche_arbre urk;
+
+			Printf.printf "     %b" (urk=elem);
 			Printf.printf "\n\n";
 
 			let nwelem = next elem in 
@@ -146,4 +175,23 @@ let () =
 			test_next nwelem (cpt+1)
 	in
 
-	test_next (unrank 1) 1
+	test_next (unrank 1) 1 
+
+
+(* 	let rec test_previous elem cpt =
+
+		Printf.printf "nouvelle etape\n";
+		affiche_arbre elem;
+		Printf.printf "       ";
+		let urk = unrank cpt in 
+		affiche_arbre urk;
+
+		Printf.printf "     %b" (urk=elem);
+
+		Printf.printf "\n\n";
+		let nwelem = previous elem in 
+
+		test_previous nwelem (cpt-1)
+	in 
+
+	test_previous (unrank count) count *)
