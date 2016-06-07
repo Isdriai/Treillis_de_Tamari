@@ -41,8 +41,10 @@ let unrank index =
 		| 1 -> N(F, F)
 		| a -> let (reste,left, right) = paire i (nbr-1, 0) in
 
+(*  			Printf.printf "reste %d     index %d       left %d   right %d \n"reste i left right;
+ *) 
 			if right > 0 then 	
-			   N(ur left (reste / (catalan right)), ur right (1+((reste-1) mod catalan right))) 
+			   N(ur left (1+((reste-1) / (catalan right))), ur right (1+((reste-1) mod catalan right))) 
 			else
 			   N(ur left i, ur 0 0)
 	in
@@ -156,8 +158,9 @@ let rec affiche_arbre a=
 
 let () =
 
-(* 	Printf.printf "nbr %d\n" count
- *)
+ 	Printf.printf "nbr %d\n" count;
+ 	flush stdout;
+ 
 
  	let rec test_next elem cpt =
 
@@ -167,16 +170,18 @@ let () =
 			let urk = unrank cpt in 
 			affiche_arbre urk;
 
-			Printf.printf "     %b" (urk=elem);
+			Printf.printf "     %b       %d" (urk=elem)  cpt;
 			Printf.printf "\n\n";
+
+			flush stdout;
 
 			let nwelem = next elem in 
 
 			test_next nwelem (cpt+1)
 	in
 
-	test_next (unrank 1) 1 
-
+	test_next (unrank 1) 1  
+ 
 
 (* 	let rec test_previous elem cpt =
 
@@ -195,3 +200,15 @@ let () =
 	in 
 
 	test_previous (unrank count) count *)
+
+(*  let truc = unrank 22 in 
+ 			Printf.printf "\n\n";
+
+ let truc = unrank 59 in 
+
+			Printf.printf "\n\n";
+
+ let truc = unrank 61 in
+ () 
+
+ *)
