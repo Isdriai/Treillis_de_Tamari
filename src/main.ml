@@ -14,7 +14,7 @@ let affiche_sup a =
 	aff "" a
 
 (* nombre de noeuds *)
-let n = 6
+let n = 8
 
 let fact n = 
 
@@ -91,7 +91,7 @@ let rec rank arbre =
 					let n_droite = niv-1-n_gauche in 
 					let min = somme_cat n_gauche niv in 
 (*   					Printf.printf "n_gauche  %d  n_droite  %d niv %d  min %d\n" n_gauche n_droite niv min;
- *)  					let tmp = min + ((rk g n_gauche)+1) * ((rk d n_droite)+1) -1 in
+ *)  					let tmp = min + (rk d n_droite) + ((catalan n_droite)*(rk g n_gauche)) in
 (*   					Printf.printf "tmp : %d\n" tmp;
  *)  					tmp
 	in
