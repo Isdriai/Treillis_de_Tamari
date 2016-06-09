@@ -1,17 +1,28 @@
 type arbre = F | N of arbre * arbre 
+type arbre_opt = O of arbre_opt * arbre_opt | A of arbre option
+
 
 let rec affiche_arbre a=
 	match a with
 	| F -> Printf.printf "F" 
 	| N(g,d) -> Printf.printf "N(" ; affiche_arbre g; Printf.printf ","; affiche_arbre d; Printf.printf ")"
 
-let affiche_sup a =
-	let rec aff s = function
+let rec aff s = function
 	| F -> Printf.printf "%s" s; Printf.printf "F\n"
 	| N (d, g) -> let s2 = s^"|            " in
 		 aff s2 g; Printf.printf "%s" s; Printf.printf"N\n"; aff s2 d 
-	in
+
+let affiche_sup a =
 	aff "" a
+
+let affiche_sup_option a =
+	let rec aff_opt s = function
+	| A(Some(abr)) -> Printf.printf "%s" s; aff s abr; Printf.printf "\n"
+	| A(None) -> Printf.printf "%s" s; Printf.printf "A(None)\n"
+	| O (d, g) -> let s2 = s^"|            " in
+		 aff_opt s2 g; Printf.printf "%s" s; Printf.printf"N\n"; aff_opt s2 d 
+	in
+	aff_opt "" a 
 
 (* nombre de noeuds *)
 let n = 8
@@ -83,21 +94,16 @@ let somme_cat nbr niv =
 
 let rec rank arbre = 
 	let rec rk abr niv= 
-		(* Printf.printf "\n\n";
-		affiche_sup abr; *)
 		match abr with
 		| F -> 0
 		| N(g,d) -> let n_gauche = compte_n g in
 					let n_droite = niv-1-n_gauche in 
 					let min = somme_cat n_gauche niv in 
-(*   					Printf.printf "n_gauche  %d  n_droite  %d niv %d  min %d\n" n_gauche n_droite niv min;
- *)  					let tmp = min + (rk d n_droite) + ((catalan n_droite)*(rk g n_gauche)) in
-(*   					Printf.printf "tmp : %d\n" tmp;
- *)  					tmp
+  					min + (rk d n_droite) + ((catalan n_droite)*(rk g n_gauche))
+ 				
 	in
 
-(*  	affiche_sup arbre;
- *) 	let res = rk arbre n in  (* Printf.printf "res : %d \n" res  ;*)  res
+  	rk arbre n
 
 let rec lisG ?(enleve = false) ?(ajoute = false) arbre =
 
@@ -155,8 +161,66 @@ let rec previous arbre =
 						| F -> raise Exit
 						| _ -> N(lisD ~ajoute: true g, lisD ~enleve: true d)
 
+let rotationD arbre = 
+ 	match arbre with
+ 	| N(N(sg,sd),d) -> N(sg,N(sd,d))
+	| _ -> Printf.printf "la rotation vient de planter \n"; raise Exit (*rotation impossible*)
+
+let rotationG arbre =
+	match arbre with
+    | N(g,N(sg,sd)) -> N(N(g,sg),sd)
+	| _ -> Printf.printf "la rotation vient de planter \n"; raise Exit (*rotation impossible*)
+
+let rec finir arbre_opt arbre =
+	match arbre_opt with
+	| O(A(None), A(Some(d))) -> N(arbre, d)
+	| O(A(Some(g)), A(None)) -> N(g, arbre)
+	| O(g, d) -> N(finir g arbre, finir d arbre)
+	| A(None) -> arbre
+	| _ -> raise Exit
+
+let rec completer arbre_opt ajout = 
+	match arbre_opt with
+	| A(None) -> ajout
+	| A(Some(abr)) -> A(Some(abr))
+	| O(A(None), d) -> O(ajout, d)
+	| O(g, A(None)) -> O(g, ajout)
+	| _ -> raise Exit
+
+let navigation arbre rotation = 
+	let solutions = ref [] in 
+
+	let rec nav abr mem =
+
+		Printf.printf "voici l'endroit on l'en est dans l'arbre\n\n";
+		affiche_sup abr;
+		Printf.printf "\n\n";
+		Printf.printf "voici ce qu'on a deja parcouru\n\n";
+ 		affiche_sup_option mem;
+		Printf.printf "\n\n"; 
 
 
+
+		match abr with
+		| F -> ()
+		| N(g,d) -> let rajoute = (finir mem (rotation abr)) in
+					solutions := rajoute::(!solutions);
+					(try
+											nav g (completer mem (O(A(None), A(Some(d)))));
+					with exit -> ());
+					try
+						nav d (completer mem (O(A(Some(g)), A(None))))
+					with exit -> ()
+	in 
+	nav arbre (A(None));
+	!solutions
+
+
+let succ arbre =
+	navigation arbre rotationD
+
+let prec arbre =
+	navigation arbre rotationG
 
 let () =
 
@@ -211,7 +275,7 @@ affiche_sup (previous truc);
  
 Printf.printf "\n\n";
 affiche_sup (unrank 112) *)
-
+(* 
     let rec test_rank elem cpt =
 	if cpt = count  then 
 		()
@@ -221,9 +285,21 @@ affiche_sup (unrank 112) *)
 		test_rank (unrank (cpt+1)) (cpt+1)
 in 
 
-test_rank (unrank 0) 0 
+test_rank (unrank 0) 0  *)
   
 (* 
 let test = unrank 61 in 
 
 let rk = rank test in ()     *)
+
+	let rec test_nav liste =
+		match liste with
+		| a::b -> Printf.printf "\n\n";
+				  affiche_sup a;
+				  test_nav b
+		| [] -> ()
+	in 
+
+let test = N (N (N (F, F), F), N (F, F)) in 
+
+test_nav (succ test)
