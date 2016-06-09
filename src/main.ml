@@ -177,7 +177,7 @@ let rec finir arbre_opt arbre =
 	| O(A(Some(g)), A(None)) -> N(g, arbre)
 	| O(g, d) -> N(finir g arbre, finir d arbre)
 	| A(None) -> arbre
-	| _ -> raise Exit
+	| _ -> Printf.printf "euh ya un pb la \n" ; raise Exit
 
 let rec completer arbre_opt ajout = 
 	match arbre_opt with
@@ -203,7 +203,11 @@ let navigation arbre rotation =
 
 		match abr with
 		| F -> ()
-		| N(g,d) -> let rajoute = (finir mem (rotation abr)) in
+		| N(g,d) -> let rot = rotation abr in
+					Printf.printf "voici le resultat de la rotation avant de l'incorporer\n\n";
+					affiche_sup rot;
+					Printf.printf "\n\n";
+					let rajoute = (finir mem rot) in
 					solutions := rajoute::(!solutions);
 					(try
 											nav g (completer mem (O(A(None), A(Some(d)))));
@@ -300,6 +304,10 @@ let rk = rank test in ()     *)
 		| [] -> ()
 	in 
 
-let test = N (N (N (F, F), F), N (F, F)) in 
+let test = N (N (N (N (F, F), F), F), N (F, F)) in 
 
-test_nav (succ test)
+let run = succ test in 
+
+Printf.printf "resultat final \n\n\n";
+
+test_nav run
