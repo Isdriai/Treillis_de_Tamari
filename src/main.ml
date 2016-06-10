@@ -1,28 +1,17 @@
 type arbre = F | N of arbre * arbre 
-type arbre_opt = O of arbre_opt * arbre_opt | A of arbre option
-
 
 let rec affiche_arbre a=
 	match a with
 	| F -> Printf.printf "F" 
 	| N(g,d) -> Printf.printf "N(" ; affiche_arbre g; Printf.printf ","; affiche_arbre d; Printf.printf ")"
 
-let rec aff s = function
+let affiche_sup a =
+	let rec aff s = function
 	| F -> Printf.printf "%s" s; Printf.printf "F\n"
 	| N (d, g) -> let s2 = s^"|            " in
 		 aff s2 g; Printf.printf "%s" s; Printf.printf"N\n"; aff s2 d 
-
-let affiche_sup a =
-	aff "" a
-
-let affiche_sup_option a =
-	let rec aff_opt s = function
-	| A(Some(abr)) -> Printf.printf "%s" s; aff s abr; Printf.printf "\n"
-	| A(None) -> Printf.printf "%s" s; Printf.printf "A(None)\n"
-	| O (d, g) -> let s2 = s^"|            " in
-		 aff_opt s2 g; Printf.printf "%s" s; Printf.printf"N\n"; aff_opt s2 d 
 	in
-	aff_opt "" a 
+	aff "" a
 
 let rec test_nav liste =
 	match liste with
@@ -177,7 +166,6 @@ let rec succ arbre =
  						   List.rev_append 
  						   (List.map (fun rg -> N(rg, c)) (succ g)) 
  						   (List.map (fun rd -> N(g, rd)) (succ c))
-
 
 let rec prec arbre =
 	(* navigation arbre rotationG *)
