@@ -24,6 +24,13 @@ let affiche_sup_option a =
 	in
 	aff_opt "" a 
 
+let rec test_nav liste =
+	match liste with
+	| a::b -> Printf.printf "\n\n";
+			  affiche_sup a;
+			  test_nav b
+	| [] -> ()
+
 (* nombre de noeuds *)
 let n = 8
 
@@ -161,64 +168,26 @@ let rec previous arbre =
 						| F -> raise Exit
 						| _ -> N(lisD ~ajoute: true g, lisD ~enleve: true d)
 
-let rotationD arbre = 
+let rec succ arbre =
+ 	(* navigation arbre rotationD *)
  	match arbre with
- 	| N(N(sg,sd),d) -> N(sg,N(sd,d))
-	| _ -> Printf.printf "la rotation vient de planter \n"; raise Exit (*rotation impossible*)
+ 	| F -> []
+ 	| N(F ,a) -> List.map (fun ra -> N(F, ra) ) ( succ a)
+ 	| N(N(a,b) as g, c) -> N(a, N(b, c)) :: 
+ 						   List.rev_append 
+ 						   (List.map (fun rg -> N(rg, c)) (succ g)) 
+ 						   (List.map (fun rd -> N(g, rd)) (succ c))
 
-let rotationG arbre =
+
+let rec prec arbre =
+	(* navigation arbre rotationG *)
 	match arbre with
-    | N(g,N(sg,sd)) -> N(N(g,sg),sd)
-	| _ -> Printf.printf "la rotation vient de planter \n"; raise Exit (*rotation impossible*)
-
-let rec finir arbre_opt arbre =
-	match arbre_opt with
-	| O(A(None), A(Some(d))) -> N(arbre, d)
-	| O(A(Some(g)), A(None)) -> N(g, arbre)
-	| O(A(Some(g)), A(Some(d))) -> N(g, d)
-	| O(g, d) -> N(finir g arbre, finir d arbre)
-	| A(None) -> arbre
-	| A(Some(abr)) -> abr
-
-let rec completer arbre_opt ajout = 
-	match arbre_opt with
-	| A(None) -> ajout
-	| A(Some(abr)) -> A(Some(abr))
-	| O(A(None), d) -> O(ajout, d)
-	| O(g, A(None)) -> O(g, ajout)
-	| _ -> raise Exit
-
-let navigation arbre rotation = 
-	let solutions = ref [] in 
-
-	let rec nav abr mem =
-
-		match abr with
-		| F -> ()
-		| N(g,d) -> (try 
-								let rot = rotation abr in
-								Printf.printf "\n\n";
-								let rajoute = (finir mem rot) in
-								solutions := rajoute::(!solutions);
-
-					with exit -> ());
-					(try
-											nav g (completer mem (O(A(None), A(Some(d)))));
-					with exit -> ());
-					try
-						nav d (completer mem (O(A(Some(g)), A(None))))
-					with exit -> ()
-	in 
-	nav arbre (A(None));
-	!solutions
-
-
-let succ arbre =
- 	navigation arbre rotationD
-
-
-let prec arbre =
-	navigation arbre rotationG
+	| F -> []
+	| N(a, F) -> List.map (fun ra -> N(ra, F)) (prec a)
+	| N(a, (N(b, c) as d)) -> N(N(a,b), c) ::
+							List.rev_append
+							(List.map (fun rg -> N(rg, a)) (prec d))
+							(List.map (fun rd -> N(d ,rd)) (prec a))
 
 let () =
 
@@ -290,17 +259,11 @@ let test = unrank 61 in
 
 let rk = rank test in ()     *)
 
-	let rec test_nav liste =
-		match liste with
-		| a::b -> Printf.printf "\n\n";
-				  affiche_sup a;
-				  test_nav b
-		| [] -> ()
-	in 
+
 
 let test = N ( N ( F , N ( N ( F, F), F)), N(F, N(N(F,F), F))) in 
 
-let run = succ test in 
+let run = prec test in 
 
 Printf.printf "resultat final \n\n\n";
 
