@@ -193,25 +193,14 @@ let navigation arbre rotation =
 
 	let rec nav abr mem =
 
-		Printf.printf "voici l'endroit on l'en est dans l'arbre\n\n";
-		affiche_sup abr;
-		Printf.printf "\n\n";
-		Printf.printf "voici ce qu'on a deja parcouru\n\n";
- 		affiche_sup_option mem;
-		Printf.printf "\n\n"; 
-
-
-
 		match abr with
 		| F -> ()
 		| N(g,d) -> (try 
 								let rot = rotation abr in
-								Printf.printf "voici le resultat de la rotation avant de l'incorporer\n\n";
-								affiche_sup rot;
 								Printf.printf "\n\n";
 								let rajoute = (finir mem rot) in
 								solutions := rajoute::(!solutions);
-								
+
 					with exit -> ());
 					(try
 											nav g (completer mem (O(A(None), A(Some(d)))));
